@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Terms Scanner</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --ink: #1b1b1b;
+        --accent: #f3b33b;
+        --accent-dark: #d89b28;
+        --card: #ffffff;
+        --border: #eadfd3;
+        --muted: #7a6f63;
+        --shadow: 0 8px 24px rgba(0,0,0,0.08);
+      }
+      body {
+        font-family: "Tahoma", "Verdana", sans-serif;
+        width: 360px;
+        padding: 16px;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      button { cursor: pointer; }
+      :focus-visible {
+        outline: 2px solid #2f6fed;
+        outline-offset: 2px;
+      }
+      .app {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        background: var(--card);
+        box-shadow: var(--shadow);
+      }
+      .card-title {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .body-text { font-size: 13px; line-height: 1.4; }
+      .stack { display: flex; flex-direction: column; gap: 10px; }
+      .links-section { margin-top: 6px; }
+      .links { margin: 0 0 0 18px; padding: 0; }
+      .links li { margin: 6px 0; }
+      .links a {
+        font-size: 16px;
+        color: var(--ink);
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+      }
+      .primary-btn {
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 16px;
+        background: var(--accent);
+        color: #111;
+        transition: transform 120ms ease, background 120ms ease;
+      }
+      .primary-btn:active { background: var(--accent-dark); }
+      .primary-btn:active { transform: translateY(1px); }
+      .primary-btn.scanning {
+        position: relative;
+        opacity: 0.9;
+      }
+      .primary-btn.scanning::after {
+        content: "";
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        border: 2px solid rgba(0,0,0,0.25);
+        border-top-color: rgba(0,0,0,0.7);
+        transform: translateY(-50%);
+        animation: spin 800ms linear infinite;
+      }
+      .primary-btn:disabled {
+        background: #d6d2cc;
+        color: #8a837a;
+        cursor: default;
+      }
+      .overall-btn {
+        font-weight: 600;
+        padding: 8px 12px;
+        cursor: default;
+      }
+      .overall-high { background: #d92d20; color: #ffffff; }
+      .overall-medium { background: #f79009; color: #ffffff; }
+      .overall-low { background: #18794e; color: #ffffff; }
+      .overall-none { background: #18794e; color: #ffffff; }
+      @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        .primary-btn { transition: none; }
+        .primary-btn.scanning::after { animation: none; }
+      }
+      .pill {
+        display: inline-block;
+        padding: 3px 8px;
+        border: 1px solid #ddd;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+      .pill-high { background: #d92d20; border-color: #d92d20; color: #ffffff; }
+      .pill-medium { background: #f79009; border-color: #f79009; color: #ffffff; }
+      .pill-none { background: #18794e; border-color: #18794e; color: #ffffff; }
+      .quote { font-size: 12px; opacity: 0.85; margin-top: 6px; white-space: pre-wrap; }
+      .muted { font-size: 12px; color: var(--muted); }
+      .hidden { display: none; }
+      .result-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+        background: var(--card);
+        box-shadow: none;
+      }
+      .download-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 28px;
+        text-align: center;
+        padding: 0;
+        position: relative;
+      }
+      .download-btn::after {
+        content: "Download report";
+        position: absolute;
+        right: 32px;
+        top: 2px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 11px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 120ms ease;
+        box-shadow: var(--shadow);
+      }
+      .download-btn:hover::after { opacity: 1; }
+      .result-card a,
+      .result-card a:visited,
+      .result-card b a {
+        color: #111 !important;
+      }
+      #nextStepsLine { margin-bottom: 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <div class="title">Terms Risk Scanner</div>
+      </div>
+
+      <div class="card" id="linksCard" aria-live="polite">
+        <div class="card-title">Scan</div>
+        <div class="body-text muted">We'll scan following links from this page.</div>
+        <div id="linksSection" class="links-section">
+          <ul class="links">
+            <li id="privacyItem" class="hidden"><a id="privacyLink" href="#" target="_blank">Privacy Policy</a></li>
+            <li id="termsItem" class="hidden"><a id="termsLink" href="#" target="_blank">Terms &amp; Conditions</a></li>
+          </ul>
+          <div id="lastScanBadge" class="muted hidden"></div>
+        </div>
+      </div>
+
+      <input id="termsUrl" type="hidden" />
+      <input id="privacyUrl" type="hidden" />
+
+      <div id="resultsCard" class="card hidden" aria-live="polite">
+        <div class="card-title">Results</div>
+        <div id="overallRow" class="stack" style="gap:6px;">
+          <button id="overallStatus" class="primary-btn" style="width:auto;" aria-live="polite">Overall: Unknown</button>
+          <div id="nextStepsLine" class="muted">Review warnings and decide if the risks are acceptable.</div>
+        </div>
+        <div id="output" class="stack" role="status" aria-live="polite"></div>
+        <div id="downloadSection" class="stack hidden" style="margin-top:8px;">
+          <div class="muted">Want to check out exact clauses? Download full report.</div>
+          <button id="downloadReport" class="primary-btn" style="width:auto;" aria-label="Download the full report">Download full report</button>
+        </div>
+      </div>
+
+      <button id="scan" class="primary-btn" aria-live="polite">Scan</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+ </html>
